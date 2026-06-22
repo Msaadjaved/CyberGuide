@@ -1,0 +1,11 @@
+# Never push these
+.env
+node_modules/
+client/node_modules/
+server/node_modules/
+*.log
+dist/
+build/
+.DS_Store
+# ignore docs 
+docs/Collaboration_Board/TASK Board.docx
