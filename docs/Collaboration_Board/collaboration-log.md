@@ -39,8 +39,8 @@ we fill this as we go. Every time you finish something meaningful, add a row. Do
 | Member | Task | Description | Decisions Made | Date |
 |--------|------|-------------|----------------|------|
 | All | Idea selection | Picked the Cybersecurity Incident Response Chatbot as our project idea after comparing 5 options. | Chose this over language learning and student wellness bots because it ties directly into our SSI specialization and the innovation gap (no student-facing guided IR tool exists) gave us a stronger research story. | 21/06/2025 |
-| All | Innovation research | Searched Google Scholar, GitHub, and Product Hunt for existing incident response chatbots. Found 3 academic papers and several enterprise tools (Jeli.io, HackBot, IntellBot). | Decided to position as Niche (2pts) but argue toward Innovative because nothing exists for students specifically. Used Claude to help summarize search results — logged in GenAI-log.docx. | 21/06/2025 |
-| Member 1 | | | | |
+| All | Innovation research | Searched Google Scholar, GitHub, and Product Hunt for existing incident response chatbots. Found 3 academic papers and several enterprise tools (Jeli.io, HackBot, IntellBot). | Decided to position as Niche but argue toward Innovative because nothing exists for students specifically. Used Claude to help summarize search results — logged in GenAI-log.docx. | 21/06/2025 |
+| Member 1 | Got the server running | I tested with groq api key and curl from the terminal and i got a response | We decided to use groq because it is free, and i am testing over terminal because frontend is not yet ready | 23/06/2026|
 | Member 2 | | | | |
 | Member 3 | | | | |
 | Member 1 | | | | |
