@@ -50,27 +50,43 @@ cyberguide/
 ## Setup — read this before you do anything else
 
 ### 1. Clone the repo
+```
 git clone https://github.com/YOUR_USERNAME/cyberguide.git
 cd cyberguide
+```
 
 ### 2. Install dependencies
+```
 cd server && npm install
 cd ../client && npm install
+```
 
 ### 3. Set up your environment
+```
 cp .env.example .env
-# Then open .env and fill in your API keys
+```
+##### Then open .env and fill in your API keys
 
 ### 4. Get your API keys (free, no credit card)
 - Groq: https://console.groq.com
 - Mistral: https://console.mistral.ai
 
 ### 5. Run the app
-# Terminal 1 — backend
+###### Terminal 1 — backend
+```
 cd server && npm run dev
+```
 
-# Terminal 2 — frontend
+##### Terminal 2 — frontend
+```
 cd client && npm run dev
+```
+
+### run with docker
+```
+cp .env.example .env  
+docker-compose up
+```
 
 Frontend runs on http://localhost:5173
 Backend runs on http://localhost:3001
