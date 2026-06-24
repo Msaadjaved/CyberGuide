@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ChatBubble from '../components/ChatBubble';
 
-// Member 2 owns the styling of this page
-// The fetch logic below is already wired — don't break it
 
-const SESSION_ID = `session-${Date.now()}`;
 
 export default function Chat() {
   const { token, logout } = useAuth(); // Added logout here
@@ -15,6 +12,27 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
+
+  // use existing session if exists , else create new one
+  const SESSION_ID = localStorage.getItem('cg_session') || `session-${Date.now()}`;
+  localStorage.setItem('cg_session', SESSION_ID);
+
+
+  // Restore history when page loads
+  useEffect(() => {
+    if (!token) return;
+    fetch(`/api/chat/history/${SESSION_ID}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.history && data.history.length > 0) {
+          setMessages(data.history);
+        }
+      })
+      .catch(() => {});
+  }, [token]);
+
 
   // Redirect to login if no token
   useEffect(() => {
@@ -54,6 +72,12 @@ export default function Chat() {
     }
   };
 
+
+  const startNewChat = () => {
+    localStorage.removeItem('cg_session');
+    window.location.reload(); // reload generates a new session ID
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -90,6 +114,15 @@ export default function Chat() {
           }}>
             View report
           </button>
+          <button onClick={startNewChat} style={{
+            background: 'transparent', border: '1px solid #444',
+            borderRadius: '6px', padding: '6px 14px',
+            color: '#aaa', cursor: 'pointer', fontSize: '13px',
+          }}>
+            New convo
+          </button>
+
+
           <button onClick={logout} style={{
             background: 'transparent', border: '1px solid #444',
             borderRadius: '6px', padding: '6px 14px',
