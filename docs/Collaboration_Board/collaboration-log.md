@@ -59,13 +59,193 @@ Each team member writes their own section below. This is where you go deeper tha
 
 ### [Member 1 — Makuo] — Backend + GenAI Integration
 
-*Write your section here as you go. Talk about the Node.js endpoints you built, how you integrated Groq and Mistral, what the system prompt looks like and why you wrote it that way, what you benchmarked between models and what you found. Include anything that didn't work the first time.*
-
 **[Start date: 21/06/2025]**
 
-...
-> Why express?
-We chose Express over other Node frameworks because it is minimal, well-documented, and lets us see exactly what is happening at each step. 
+**Overview**
+
+I owned the entire server/ folder — the Express server, all three API 
+routes, the JWT middleware, the AI provider switcher, and the system 
+prompt. I also handled the GenAI integration and benchmarking between 
+two providers.
+
+---
+
+**Day 1 — Project setup and backend scaffold (21/06/2025)**
+
+We started by reading the project brief together as a team and picking 
+our idea. We compared 5 options before settling on the Cybersecurity 
+Incident Response Chatbot. The main reason was that our SSI 
+specialization gave us credibility on the topic, and research showed no 
+student-facing guided IR tool exists — which positioned us as Niche 
+leaning toward Innovative on the grading scale.
+
+I also did the innovation research on Google Scholar, GitHub, and 
+Product Hunt. Found papers like IntellBot (arXiv 2024) and enterprise 
+tools like Jeli.io and HackBot — all built for professionals, not 
+students. That gap is what we built into.
+
+---
+
+**Day 2 — Server setup and first AI response (23/06/2025)**
+
+I set up the backend from the scaffold. The first issue I hit was 
+dotenv not finding the .env file. The server was running from inside 
+server/ but the .env was in the root. Fixed it by changing:
+
+  require('dotenv').config()
+  
+to:
+
+  require('dotenv').config({ path: '../.env' })
+
+This was a small fix but it took a while to figure out why the terminal 
+was showing "AI provider: undefined" when the .env was clearly filled 
+in. Lesson learned: dotenv resolves paths relative to where the process 
+runs, not where the file is.
+
+After that fix, health check at localhost:3001/api/health returned:
+  { "status": "ok", "provider": "groq" }
+
+Then I tested the full auth + chat flow using curl:
+
+  Step 1 — got a JWT token from POST /api/auth/login
+  Step 2 — sent a chat message with the token in Authorization header
+  Step 3 — got back an AI reply following the system prompt structure
+
+First AI response came back in under 3 seconds on Groq. It followed 
+the 6-option incident type structure from the system prompt correctly.
+
+
+---
+
+**Day 3 — Session persistence bug fix (24/06/2025)**
+
+After Javed pushed the frontend, we tested the full flow together. 
+Found two bugs:
+
+Bug 1 — "View report" said "no session found"
+The session ID was being generated fresh every page load but never 
+saved to localStorage so the Report page couldn't find it.
+
+Fix: added localStorage.setItem('cg_session', SESSION_ID) right after 
+generating the ID.
+
+Bug 2 — "Back to chat" after viewing report started a new conversation
+The SESSION_ID was declared outside the component so it regenerated on 
+every navigation. Also the messages array was empty on return because 
+useState([]) always starts fresh.
+
+Fix: moved SESSION_ID inside the component and added a useEffect that 
+fetches the conversation history from GET /api/chat/history/:sessionId 
+on page load. Now navigating back to chat restores the full 
+conversation.
+
+Both fixes were small but the second one required understanding how 
+React's component lifecycle works — useState resets on every mount, so 
+you have to re-fetch from the backend to restore state.
+
+---
+
+**Day 4 — OpenRouter integration + benchmarking (25/06/2025)**
+
+Originally the scaffold had Mistral as the second provider. I switched 
+it to OpenRouter because I already had an account and it gives access 
+to multiple models through one API key — better for benchmarking.
+
+Added callOpenRouter() to server/services/llm.js using fetch() instead 
+of an SDK. OpenRouter uses the same format as OpenAI's API, just a 
+different base URL. The provider switch still works by changing one 
+line in .env — no code changes needed.
+
+**Dead end 1:** mistralai/mistral-7b-instruct:free — model no longer 
+available on OpenRouter free tier. Got error: "No endpoints found."
+
+**Dead end 2:** meta-llama/llama-3.1-8b-instruct:free — also removed 
+from free tier. Error: "This model is unavailable for free."
+
+**What worked:** poolside/laguna-xs.2:free — currently available free 
+model on OpenRouter. Responses were slower (30+ seconds vs Groq's 2-3 
+seconds) but the quality was comparable.
+
+**Benchmarking observations (Groq vs OpenRouter):**
+
+| Criterion | Groq (llama-3.1-8b-instant) | OpenRouter (poolside/laguna-xs.2) |
+|-----------|----------------------------|-----------------------------------|
+| Response speed | ~2-3 seconds | 30+ seconds |
+| Opened with 6 options | Yes | Yes |
+| One question at a time | Yes | Sometimes asked 2 at once |
+| Plain language | Yes | Yes, with more emojis |
+| Followed 5 phases | Yes | Yes |
+| Report format | Clean | Clean |
+| Overall quality | 4/5 | 3/5 |
+
+**Decision:** Groq is the better primary provider for this app. Speed 
+matters for incident response — a user dealing with a real security 
+incident should not wait 30 seconds between messages. Groq also 
+followed the one-question-at-a-time rule more consistently.
+
+**Why this matters for the GDPR section:** Groq is US-based. OpenRouter 
+is also US-based. Neither satisfies GDPR data residency requirements 
+for EU users. This is documented in Hassan's privacy section — the 
+recommendation is to switch to Mistral (EU-based) for any production 
+deployment serving European students.
+
+---
+
+**Architecture decisions I made:**
+
+1. Why Express over other frameworks: minimal, well-documented, lets 
+you see exactly what's happening. A bigger framework like NestJS adds 
+complexity we don't need for a prototype.
+
+2. Why in-memory sessions: we store conversation history in a sessions 
+object on the server. No database needed. It resets when the server 
+restarts which is fine for a demo. A real product would use Redis or 
+PostgreSQL.
+
+3. Why JWT: stateless authentication means the server doesn't need to 
+remember who is logged in. All the user info is packed into the token 
+itself, signed with our secret. If the token is valid, we trust it.
+
+4. Why abstract the AI provider into llm.js: the Strategy Pattern — 
+the route doesn't care which AI is being used, it just calls 
+getAIReply(). This is what made switching providers for benchmarking 
+possible with zero code changes.
+
+---
+
+**Answers to key questions:**
+
+What does middleware do in Express?
+Middleware is a function that runs between the HTTP request arriving 
+and the route handler running. Our verifyToken() checks the JWT before 
+any protected route runs. If the token is missing or invalid, the 
+request is rejected and the route handler never runs.
+
+What is the difference between 401 and 403?
+401 = no token sent, we don't know who this is.
+403 = token exists but is invalid or expired.
+Same as: 401 = no ID card, 403 = fake ID card.
+
+Why JWT instead of storing a username in session?
+JWT is stateless — the server stores nothing. All user info is signed 
+into the token. The server just verifies the signature. Cleaner, 
+scales better, no session store needed.
+
+---
+
+**Completion checklist:**
+- [x] Server runs on port 3001
+- [x] Health check returns { status: ok, provider: groq }
+- [x] POST /api/auth/login returns JWT token
+- [x] POST /api/chat returns AI reply following system prompt
+- [x] GET /api/chat/history/:id returns conversation
+- [x] GET /api/report/:id returns last AI message
+- [x] Session persists across chat and report pages
+- [x] OpenRouter integrated as second provider
+- [x] Groq vs OpenRouter benchmarked with 5 prompts
+- [x] All commits pushed to feat/backend
+
 
 ---
 
