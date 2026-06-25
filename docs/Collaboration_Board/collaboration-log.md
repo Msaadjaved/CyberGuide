@@ -350,20 +350,48 @@ All work is pushed to `feat/frontend` branch. The branch is now 2 commits ahead 
 
 ### [Member 3 — Hassan] — Documentation + Privacy + Security
 
-*Write your section here as you go. Talk about how you researched the data privacy angle (GDPR, what data the chatbot stores, Mistral vs US providers), how you identified security threats, and how you organized the GenAI log. Include any moments where the research surprised you or changed your thinking.*
+**[Start date: 25/06/2026]**
 
-**[Start date:]**
+**Day 1 — All Three Documents Completed (25/06/2026)**
 
-...
+My role was to own all written documentation for the project. I produced three documents: B-conception.docx (conception and architecture), D-privacy.docx (GDPR analysis), and E-security.docx (security analysis). I also coordinated setting up the GitHub Projects task board with the team and got the architecture diagrams embedded into the conception document.
+
+**How I planned my work:**
+
+I used the instruction document I was given as a checklist and worked through each document in order. Before writing anything, I read through the server files — auth.js, llm.js, chat.js, and the system prompt — so I understood what the code actually does rather than just describing it at a surface level. I worked in one focused session, completing all three documents the same day.
+
+**What went well:**
+
+The structure of the instruction document made the scope very clear. I never had to guess what was expected — the framework was there and I filled it with content grounded in the actual codebase. The provider abstraction in llm.js (switching between Groq and Mistral via a single environment variable) made the GDPR analysis much stronger than I expected: the compliance fix for EU deployment is literally a one-line change to .env, which is a concrete and honest argument rather than a vague recommendation.
+
+**What did not go well:**
+
+Setting up the GitHub Projects board took longer than it should have. I did not have write access to the repository initially, and the project visibility was set to private so I could not see it even after being added as a collaborator. This was resolved once Javed changed the project visibility to public. In future I would make sure repo and project access is sorted on day one before any work starts.
+
+**What surprised me:**
+
+Understanding the security implications took more thought than expected. Reading that JWT tokens are stored in localStorage and connecting that to the XSS threat — and then realising that the same fix (httpOnly cookies) appears as both a security recommendation in E-security.docx and a privacy recommendation in D-privacy.docx — made me see how security and privacy are not separate concerns but the same problem looked at from two angles.
+
+**What I would do differently:**
+
+Start by reading the code first, before opening any document. I spent some time early on writing about things I had not fully understood yet and had to go back and revise. If I had done a full read-through of the server files in the first 30 minutes, the writing would have been faster and more confident throughout.
+
+**Documents produced:**
+
+| Document | Points | Status |
+|----------|--------|--------|
+| B-conception.docx | 4 pts | Complete — pushed to feat/docs |
+| D-privacy.docx | 4 pts | Complete — pushed to feat/docs |
+| E-security.docx | 4 pts | Complete — pushed to feat/docs |
 
 ---
 
 ## Notes on how we split the work
 
-*(Fill this in together as a team — a short honest paragraph on how the division of work actually went, including any adjustments you made mid-project. This is what the grader reads to understand your team dynamic.)*
+The division of work followed our assigned roles from the start and stayed consistent throughout. Makuo owned the backend entirely — server setup, JWT auth, AI integration, and the system prompt. Javed owned the frontend — all three React pages, the ChatBubble component, and the Three.js globe. Hassan owned all written documentation — the three deliverable documents plus keeping this log and the GenAI log updated.
 
-...
+The main adjustment mid-project was on the documentation side: Hassan needed access to the GitHub repository and Projects board to include the task tracking screenshot in B-conception.docx. This required Javed (who managed the repo) to add Hassan as a collaborator and set the project visibility to public. It caused a short delay but was resolved the same day. Everything else proceeded as planned with no role changes or reassignments.
 
 ---
 
-*Last updated: 23/06/2026*
+*Last updated: 25/06/2026*
