@@ -1,9 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-// Attach this to any route you want to protect
-// Usage: router.post('/', verifyToken, (req, res) => { ... })
-// After this runs, req.user has the decoded token payload
-
 function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // expects: Bearer <token>
